@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#4CAF50">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Falamigo Escolar</title>
+<link rel="icon" type="image/jpeg" href="logo.jpg">
+<link rel="apple-touch-icon" href="logo.jpg">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: #1b5e20;
+}
+#telaInicial {
+  position: fixed; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  background: linear-gradient(180deg, #a5d6a7 0%, #66bb6a 100%);
+  z-index: 1000;
+  transition: opacity 0.6s;
+}
+#telaInicial.oculto { opacity:0; pointer-events:none; }
+.logo-inicial {
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  border: 6px solid #fff;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  object-fit: cover;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.05)}
+}
+.titulo-inicial {
+  font-size: 2.2rem; font-weight: 900; color: #fff;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  margin-bottom: 8px; letter-spacing: 2px;
+}
+.subtitulo-inicial {
+  font-size: 1.1rem; color: #e8f5e9; margin-bottom: 20px;
+}
+.btn-entrar {
+  padding: 16px 50px; font-size: 1.3rem; font-weight: bold;
+  border: none; border-radius: 50px; background: #fff; color: #2e7d32;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  cursor: pointer; transition: all 0.2s; margin-bottom: 12px;
+}
+.btn-entrar:active { transform: scale(0.95); background: #f1f8e9; }
+.btn-ativar-som {
+  padding: 12px 30px; font-size: 1rem; font-weight: bold;
+  border: 3px solid #fff; border-radius: 50px;
+  background: transparent; color: #fff;
+  cursor: pointer; transition: all 0.2s; margin-bottom: 12px;
+}
+.btn-ativar-som:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
+.status-som {
+  margin-top: 10px; color: #fff; font-size: 0.9rem; font-weight: 600;
+  text-align: center; padding: 8px 16px; border-radius: 10px;
+  background: rgba(0,0,0,0.15); min-height: 36px;
+}
+#app { display:none; padding-bottom: 90px; }
+#app.ativo { display:block; }
+.header {
+  background: linear-gradient(90deg, #43a047, #2e7d32);
+  padding: 12px 16px; display:flex;
+  align-items:center; justify-content:space-between;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  position: sticky; top:0; z-index:100;
+}
+.header img { width: 44px; height: 44px; border-radius: 50%; border: 3px solid #fff; object-fit: cover; }
+.header h1 { color: #fff; font-size: 1.3rem; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+.header .hora { color: #c8e6c9; font-size: 0.85rem; font-weight: 600; }
+.mascote-area {
+  display: flex; align-items: center; justify-content: center;
+  padding: 10px; background: rgba(255,255,255,0.6); gap: 12px;
+}
+.mascote-video {
+  width: 100px; height: 100px; border-radius: 50%;
+  border: 4px solid #4caf50; object-fit: cover; background: #fff;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+.mascote-fala {
+  background: #fff; border-radius: 20px; padding: 12px 18px;
+  max-width: 60%; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  font-size: 1rem; font-weight: 600; color: #2e7d32;
+  min-height: 44px; display: flex; align-items: center; position: relative;
+}
+.mascote-fala::before {
+  content: ""; position: absolute; left: -10px; top: 50%;
+  transform: translateY(-50%); border: 10px solid transparent;
+  border-right-color: #fff;
+}
+.abas-nav {
+  display: flex; overflow-x: auto; background: #fff;
+  padding: 6px 4px; gap: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  position: sticky; top: 68px; z-index: 99; scrollbar-width: none;
+}
+.abas-nav::-webkit-scrollbar { display:none; }
+.aba-btn {
+  flex: 0 0 auto; padding: 10px 14px; border: none; border-radius: 20px;
+  background: #e8f5e9; color: #388e3c; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: all 0.2s;
+}
+.aba-btn.ativa { background: #4caf50; color: #fff; box-shadow: 0 3px 10px rgba(76,175,80,0.4); }
+.aba-btn:active { transform: scale(0.95); }
+.aba-conteudo { display: none; padding: 16px; }
+.aba-conteudo.ativa { display: block; }
+.secao-titulo {
+  font-size: 1.1rem; font-weight: 800; color: #1b5e20;
+  margin: 16px 0 10px 0; padding-left: 10px;
+  border-left: 4px solid #4caf50;
+}
+.secao-titulo:first-child { margin-top: 0; }
+.grid-botoes {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+}
+@media(min-width: 500px) { .grid-botoes { grid-template-columns: repeat(3, 1fr); } }
+.btn-card {
+  background: #fff; border: 3px solid #c8e6c9; border-radius: 16px;
+  padding: 16px 10px; text-align: center; cursor: pointer;
+  transition: all 0.15s; box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; min-height: 100px; justify-content: center;
+}
+.btn-card:active { transform: scale(0.96); border-color: #4caf50; background: #e8f5e9; }
+.btn-card .icone { font-size: 2rem; line-height: 1; }
+.btn-card .texto { font-size: 0.95rem; font-weight: 700; color: #2e7d32; line-height: 1.2; }
+.cat-quero .btn-card { border-color: #81c784; }
+.cat-quero .btn-card:active { background: #c8e6c9; }
+.cat-sinto .btn-card { border-color: #ffb74d; }
+.cat-sinto .btn-card:active { background: #ffe0b2; }
+.cat-perguntar .btn-card { border-color: #64b5f6; }
+.cat-perguntar .btn-card:active { background: #bbdefb; }
+.cat-cortesia .btn-card { border-color: #ba68c8; }
+.cat-cortesia .btn-card:active { background: #e1bee7; }
+.cat-responder .btn-card { border-color: #ef5350; }
+.cat-responder .btn-card:active { background: #ffcdd2; }
+.cat-comer .btn-card { border-color: #ff9800; }
+.cat-comer .btn-card:active { background: #ffe0b2; }
+.cat-brinquedos .btn-card { border-color: #f06292; }
+.cat-brinquedos .btn-card:active { background: #f8bbd0; }
+.cat-brincar .btn-card { border-color: #4dd0e1; }
+.cat-brincar .btn-card:active { background: #b2ebf2; }
+.diario-box {
+  background: #fff; border-radius: 16px; padding: 16px;
+  margin-bottom: 16px; box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+.diario-box h3 { color: #2e7d32; font-size: 1rem; margin-bottom: 10px; }
+.diario-box input, .diario-box textarea, .diario-box select {
+  width: 100%; border: 2px solid #c8e6c9; border-radius: 10px;
+  padding: 10px; font-size: 0.95rem; font-family: inherit;
+  margin-bottom: 10px;
+}
+.diario-box input { min-height: auto; }
+.diario-box textarea { resize: vertical; min-height: 80px; }
+.diario-box select { min-height: auto; resize: none; }
+.btn-salvar {
+  background: #4caf50; color: #fff; border: none; border-radius: 10px;
+  padding: 12px 24px; font-size: 1rem; font-weight: bold;
+  cursor: pointer; width: 100%; transition: all 0.2s;
+}
+.btn-salvar:active { background: #388e3c; transform: scale(0.98); }
+.btn-falar {
+  background: #2196f3; color: #fff; border: none; border-radius: 10px;
+  padding: 14px 24px; font-size: 1.1rem; font-weight: bold;
+  cursor: pointer; width: 100%; transition: all 0.2s; margin-top: 10px;
+}
+.btn-falar:active { background: #1976d2; transform: scale(0.98); }
+.ranking-lista { list-style: none; }
+.ranking-lista li {
+  display: flex; justify-content: space-between; padding: 8px 12px;
+  background: #f1f8e9; border-radius: 8px; margin-bottom: 6px;
+  font-size: 0.9rem; font-weight: 600;
+}
+.ranking-lista li .contador {
+  background: #4caf50; color: #fff; padding: 2px 10px;
+  border-radius: 10px; font-size: 0.8rem;
+}
+.barra-inferior {
+  position: fixed; bottom: 0; left:0; right:0; background: #fff;
+  padding: 8px 16px; display: flex;
+  justify-content: space-between; align-items: center;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100;
+}
+.btn-volume {
+  background: #e8f5e9; border: none; border-radius: 50%;
+  width: 44px; height: 44px; font-size: 1.3rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.status-tts { font-size: 0.8rem; color: #666; font-weight: 600; }
+@keyframes bounce {
+  0%,100%{transform:scale(1)} 40%{transform:scale(1.15)} 60%{transform:scale(0.95)}
+}
+.anim-clique { animation: bounce 0.3s ease; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #e8f5e9; }
+::-webkit-scrollbar-thumb { background: #81c784; border-radius: 3px; }
+
+/* ========= MODO NOTURNO ========= */
+body.modo-noturno {
+  background: linear-gradient(135deg, #1a237e 0%, #0d1642 100%);
+  color: #e0e0e0;
+}
+body.modo-noturno #telaInicial {
+  background: linear-gradient(180deg, #1a237e 0%, #0d1642 100%);
+}
+body.modo-noturno .header {
+  background: linear-gradient(90deg, #1a237e, #0d1642);
+}
+body.modo-noturno .abas-nav {
+  background: #1a1a2e;
+}
+body.modo-noturno .aba-btn {
+  background: #16213e;
+  color: #90caf9;
+}
+body.modo-noturno .aba-btn.ativa {
+  background: #3949ab;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(57,73,171,0.5);
+}
+body.modo-noturno .btn-card {
+  background: #1e1e2f;
+  border-color: #3949ab;
+}
+body.modo-noturno .btn-card .texto {
+  color: #e0e0e0;
+}
+body.modo-noturno .secao-titulo {
+  color: #90caf9;
+  border-left-color: #3949ab;
+}
+body.modo-noturno .mascote-area {
+  background: rgba(30,30,47,0.6);
+}
+body.modo-noturno .mascote-fala {
+  background: #1e1e2f;
+  color: #e0e0e0;
+}
+body.modo-noturno .mascote-fala::before {
+  border-right-color: #1e1e2f;
+}
+body.modo-noturno .diario-box {
+  background: #1e1e2f;
+}
+body.modo-noturno .diario-box h3 {
+  color: #90caf9;
+}
+body.modo-noturno .diario-box input,
+body.modo-noturno .diario-box textarea,
+body.modo-noturno .diario-box select {
+  background: #16213e;
+  border-color: #3949ab;
+  color: #e0e0e0;
+}
+body.modo-noturno .ranking-lista li {
+  background: #16213e;
+  color: #e0e0e0;
+}
+body.modo-noturno .barra-inferior {
+  background: #1a1a2e;
+}
+body.modo-noturno .btn-volume {
+  background: #16213e;
+  color: #e0e0e0;
+}
+body.modo-noturno .status-tts {
+  color: #90caf9;
+}
+body.modo-noturno ::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+body.modo-noturno ::-webkit-scrollbar-thumb {
+  background: #3949ab;
+}
+/* Botão modo noturno no header */
+.btn-modo {
+  background: transparent;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: all 0.2s;
+}
+body.modo-noturno .btn-modo {
+  border-color: #ffd700;
+  color: #ffd700;
+}
+
+/* ===== LAYOUT COM MASCOTE NA LATERAL ===== */
+.layout-principal { display:flex; gap:14px; padding:14px; max-width:1024px; margin:0 auto; align-items:flex-start; }
+.coluna-conteudo { flex:1; min-width:0; }
+.coluna-mascote { flex:0 0 170px; position:sticky; top:140px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+.coluna-mascote .mascote-video { width:150px; height:150px; transform-origin:50% 90%; }
+.mascote-video.falando { animation: mascoteFalando .5s ease-in-out infinite; box-shadow:0 0 0 4px #ffd54f, 0 4px 15px rgba(0,0,0,.2); }
+@keyframes mascoteFalando {
+  0%,100% { transform:rotate(-4deg) scale(1); }
+  50% { transform:rotate(4deg) scale(1.07); }
+}
+@media(max-width:640px) {
+  .layout-principal { flex-direction:column; padding:10px; }
+  .coluna-mascote { flex:0 0 auto; flex-direction:row; position:static; width:100%; order:-1;
+    justify-content:center; background:rgba(255,255,255,.6); border-radius:16px; padding:8px; }
+  .coluna-mascote .mascote-video { width:90px; height:90px; }
+  .coluna-mascote .mascote-fala { max-width:60%; }
+}
+/* ===== ABA NUMEROS ===== */
+.grid-numeros { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+@media(max-width:480px) { .grid-numeros { grid-template-columns:repeat(3,1fr); } }
+.btn-numero { border:3px solid #ffca28; background:#fff; border-radius:16px; padding:12px 6px;
+  display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer;
+  box-shadow:0 3px 10px rgba(0,0,0,.06); transition:all .15s; min-height:96px; justify-content:center; }
+.btn-numero:active { transform:scale(.95); background:#fff8e1; border-color:#ff9800; }
+.btn-numero .digito { font-size:2.4rem; font-weight:900; color:#e65100; line-height:1; }
+.btn-numero .escrito { font-size:1rem; font-weight:800; color:#2e7d32; }
+.btn-numero .fonetica { font-size:.72rem; font-weight:700; color:#888; letter-spacing:.5px; }
+.btn-contar { width:100%; margin-top:14px; padding:16px; border:none; border-radius:16px;
+  background:linear-gradient(90deg,#ff9800,#f57c00); color:#fff; font-size:1.2rem; font-weight:900;
+  cursor:pointer; box-shadow:0 4px 12px rgba(255,152,0,.4); }
+.btn-contar:active { transform:scale(.97); }
+/* Modo noturno */
+body.modo-noturno .coluna-mascote { background:rgba(30,30,47,.6); }
+body.modo-noturno .btn-numero { background:#1e1e2f; }
+body.modo-noturno .btn-numero .escrito { color:#90caf9; }
+body.modo-noturno .btn-numero:active { background:#16213e; }
+</style>
+</head>
+<body>
+<div id="telaInicial">
+  <img src="logo.jpg" class="logo-inicial" alt="Falamigo">
+  <div class="titulo-inicial">FALAMIGO</div>
+  <div class="subtitulo-inicial">Versão Escolar</div>
+  <button class="btn-ativar-som" id="btnAtivarSom" onclick="ativarSom()">🔊 Ativar Som</button>
+  <button class="btn-entrar" id="btnEntrar" onclick="entrarApp()" style="opacity:0.5;">ENTRAR</button>
+  <div class="status-som" id="statusSom">Toque em "Ativar Som" primeiro</div>
+</div>
+<div id="app">
+  <div class="header">
+    <img src="logo.jpg" alt="Logo">
+    <h1>Falamigo Escolar</h1>
+    <div class="hora" id="horaAtual">--:--</div>    <button class="btn-modo" onclick="alternarModoNoturno()" id="btnModo" title="Modo Noturno">&#127769;</button>
+
+  </div>
+  <div class="layout-principal">
+  <div class="coluna-conteudo">
+  <div class="abas-nav">
+    <button class="aba-btn ativa" onclick="mostrarAba('sobremim', this)">Sobre Mim</button>
+    <button class="aba-btn" onclick="mostrarAba('quero', this)">Quero</button>
+    <button class="aba-btn" onclick="mostrarAba('sinto', this)">Sinto</button>
+    <button class="aba-btn" onclick="mostrarAba('perguntar', this)">Perguntar</button>
+    <button class="aba-btn" onclick="mostrarAba('cortesia', this)">Cortesia</button>
+    <button class="aba-btn" onclick="mostrarAba('responder', this)">Responder</button>
+    <button class="aba-btn" onclick="mostrarAba('brincar', this)">Brincar</button>
+    <button class="aba-btn" onclick="mostrarAba('comer', this)">Comer</button>
+    <button class="aba-btn" onclick="mostrarAba('brinquedos', this)">Brinquedos</button>
+    <button class="aba-btn" onclick="mostrarAba('numeros', this)">Números</button>
+  <button class="aba-btn" onclick="mostrarAba('diario', this)">Diário</button>
+  </div>
+<div id="sobremim" class="aba-conteudo ativa">
+<div class="secao-titulo">Meus Dados</div>
+<div class="diario-box">
+<h3>Meu nome</h3>
+<input type="text" id="nomeAluno" placeholder="Digite o nome do aluno...">
+<h3>Eu estudo em</h3>
+<input type="text" id="nomeEscola" placeholder="Digite o nome da escola...">
+<h3>Minha professora se chama</h3>
+<input type="text" id="nomeProfessora" placeholder="Digite o nome da professora...">
+<button class="btn-salvar" onclick="salvarDadosPessoais()">Salvar Meus Dados</button>
+</div>
+<div class="secao-titulo">Apresentação</div>
+<div class="diario-box">
+<p style="color:#555; margin-bottom:12px; line-height:1.5;">
+Toque no botão abaixo para se apresentar. O aplicativo vai falar por você!
+</p>
+<button class="btn-falar" onclick="apresentar()">📢 Falar Minha Apresentação</button>
+</div>
+<div class="secao-titulo">Como Me Comunico</div>
+<div class="diario-box">
+<p style="color:#555; line-height:1.6;">
+<b>Eu sou uma pessoa não verbal.</b><br><br>
+Isso significa que eu não falo com a boca, mas eu entendo tudo o que você diz!<br><br>
+Eu me comunico através deste aplicativo <b>Falamigo</b>.<br><br>
+Quando eu toco nos botões, o aplicativo fala por mim.<br><br>
+Por favor, tenha paciência e aguarde eu escolher o que quero dizer.
+</p>
+<button class="btn-falar" onclick="falarComunicacao()">📢 Falar Como Me Comunico</button>
+</div>
+</div>
+<div id="quero" class="aba-conteudo cat-quero">
+<div class="secao-titulo">Comida e Bebida</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Quero mais comida, por favor')"><span class="icone">&#127860;</span><span class="texto">Quero mais comida</span></div>
+<div class="btn-card" onclick="falar(this, 'Não quero mais, obrigado')"><span class="icone">&#128581;</span><span class="texto">Não quero mais</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero água, por favor')"><span class="icone">&#128167;</span><span class="texto">Quero água</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero suco, por favor')"><span class="icone">&#129371;</span><span class="texto">Quero suco</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou com fome')"><span class="icone">&#127828;</span><span class="texto">Estou com fome</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou com sede')"><span class="icone">&#129380;</span><span class="texto">Estou com sede</span></div>
+</div>
+<div class="secao-titulo">Necessidades</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Preciso ir ao banheiro')"><span class="icone">&#128701;</span><span class="texto">Preciso ir ao banheiro</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero meu abafador')"><span class="icone">&#127911;</span><span class="texto">Quero meu abafador</span></div>
+<div class="btn-card" onclick="falar(this, 'Preciso de ajuda')"><span class="icone">&#127385;</span><span class="texto">Preciso de ajuda</span></div>
+<div class="btn-card" onclick="falar(this, 'Não estou me sentindo bem')"><span class="icone">&#129298;</span><span class="texto">Não estou bem</span></div>
+</div>
+<div class="secao-titulo">Material Escolar</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Quero livro, por favor')"><span class="icone">&#128214;</span><span class="texto">Quero livro</span></div>
+<div class="btn-card" onclick="falar(this, 'Poderia me dar o lápis de cor, por favor')"><span class="icone">&#9999;</span><span class="texto">Poderia me dar o lápis de cor</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero a borracha, por favor')"><span class="icone">&#129533;</span><span class="texto">Quero a borracha</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero o apontador, por favor')"><span class="icone">&#128298;</span><span class="texto">Quero o apontador</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero a régua, por favor')"><span class="icone">&#128207;</span><span class="texto">Quero a régua</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero a tesoura, por favor')"><span class="icone">&#9986;</span><span class="texto">Quero a tesoura</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero a cola, por favor')"><span class="icone">&#129524;</span><span class="texto">Quero a cola</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero o caderno, por favor')"><span class="icone">&#128211;</span><span class="texto">Quero o caderno</span></div>
+</div>
+<div class="secao-titulo">Sala de Aula</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Quero ir para a biblioteca')"><span class="icone">&#128218;</span><span class="texto">Quero ir para a biblioteca</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero ir para a sala de informática')"><span class="icone">&#128187;</span><span class="texto">Quero ir para a informática</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero ir para o pátio')"><span class="icone">&#127795;</span><span class="texto">Quero ir para o pátio</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero ir para a cantina')"><span class="icone">&#127978;</span><span class="texto">Quero ir para a cantina</span></div>
+</div>
+</div>
+<div id="sinto" class="aba-conteudo cat-sinto">
+<div class="secao-titulo">Sentimentos</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Estou me sentindo bem')"><span class="icone">&#128522;</span><span class="texto">Estou bem</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou me sentindo mal')"><span class="icone">&#128546;</span><span class="texto">Estou mal</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou feliz')"><span class="icone">&#128516;</span><span class="texto">Estou feliz</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou triste')"><span class="icone">&#128532;</span><span class="texto">Estou triste</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou com medo')"><span class="icone">&#128552;</span><span class="texto">Estou com medo</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou com raiva')"><span class="icone">&#128544;</span><span class="texto">Estou com raiva</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou cansado')"><span class="icone">&#128564;</span><span class="texto">Estou cansado</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou animado')"><span class="icone">&#129321;</span><span class="texto">Estou animado</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou envergonhado')"><span class="icone">&#128563;</span><span class="texto">Estou envergonhado</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou confuso')"><span class="icone">&#128533;</span><span class="texto">Estou confuso</span></div>
+</div>
+<div class="secao-titulo">Físico</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Estou com dor de cabeça')"><span class="icone">&#129301;</span><span class="texto">Dor de cabeça</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou com dor de barriga')"><span class="icone">&#129314;</span><span class="texto">Dor de barriga</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou com frio')"><span class="icone">&#129398;</span><span class="texto">Estou com frio</span></div>
+<div class="btn-card" onclick="falar(this, 'Estou com calor')"><span class="icone">&#129397;</span><span class="texto">Estou com calor</span></div>
+</div>
+</div>
+<div id="perguntar" class="aba-conteudo cat-perguntar">
+<div class="secao-titulo">Perguntas</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Por quê?')"><span class="icone">&#10067;</span><span class="texto">Por quê?</span></div>
+<div class="btn-card" onclick="falar(this, 'Quando?')"><span class="icone">&#9200;</span><span class="texto">Quando?</span></div>
+<div class="btn-card" onclick="falar(this, 'Onde?')"><span class="icone">&#128205;</span><span class="texto">Onde?</span></div>
+<div class="btn-card" onclick="falar(this, 'Como?')"><span class="icone">&#129300;</span><span class="texto">Como?</span></div>
+<div class="btn-card" onclick="falar(this, 'O quê?')"><span class="icone">&#128230;</span><span class="texto">O quê?</span></div>
+<div class="btn-card" onclick="falar(this, 'Quem?')"><span class="icone">&#128100;</span><span class="texto">Quem?</span></div>
+<div class="btn-card" onclick="falar(this, 'Quanto?')"><span class="icone">&#128290;</span><span class="texto">Quanto?</span></div>
+<div class="btn-card" onclick="falar(this, 'Qual?')"><span class="icone">&#127919;</span><span class="texto">Qual?</span></div>
+</div>
+<div class="secao-titulo">Frases de Pergunta</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Posso ir ao banheiro?')"><span class="icone">&#128701;</span><span class="texto">Posso ir ao banheiro?</span></div>
+<div class="btn-card" onclick="falar(this, 'Posso beber água?')"><span class="icone">&#128167;</span><span class="texto">Posso beber água?</span></div>
+<div class="btn-card" onclick="falar(this, 'Posso ir para o pátio?')"><span class="icone">&#127795;</span><span class="texto">Posso ir para o pátio?</span></div>
+<div class="btn-card" onclick="falar(this, 'O que vamos fazer agora?')"><span class="icone">&#128203;</span><span class="texto">O que vamos fazer agora?</span></div>
+<div class="btn-card" onclick="falar(this, 'Quando vamos para casa?')"><span class="icone">&#127968;</span><span class="texto">Quando vamos para casa?</span></div>
+<div class="btn-card" onclick="falar(this, 'Onde está meu material?')"><span class="icone">&#127890;</span><span class="texto">Onde está meu material?</span></div>
+</div>
+</div>
+<div id="cortesia" class="aba-conteudo cat-cortesia">
+<div class="secao-titulo">Palavras de Cortesia</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Por favor')"><span class="icone">&#128591;</span><span class="texto">Por favor</span></div>
+<div class="btn-card" onclick="falar(this, 'Obrigado')"><span class="icone">&#128522;</span><span class="texto">Obrigado</span></div>
+<div class="btn-card" onclick="falar(this, 'Obrigada')"><span class="icone">&#127800;</span><span class="texto">Obrigada</span></div>
+<div class="btn-card" onclick="falar(this, 'Com licença')"><span class="icone">&#128694;</span><span class="texto">Com licença</span></div>
+<div class="btn-card" onclick="falar(this, 'Desculpe')"><span class="icone">&#128532;</span><span class="texto">Desculpe</span></div>
+<div class="btn-card" onclick="falar(this, 'De nada')"><span class="icone">&#128154;</span><span class="texto">De nada</span></div>
+<div class="btn-card" onclick="falar(this, 'Bom dia')"><span class="icone">&#9728;</span><span class="texto">Bom dia</span></div>
+<div class="btn-card" onclick="falar(this, 'Boa tarde')"><span class="icone">&#127780;</span><span class="texto">Boa tarde</span></div>
+<div class="btn-card" onclick="falar(this, 'Boa noite')"><span class="icone">&#127769;</span><span class="texto">Boa noite</span></div>
+<div class="btn-card" onclick="falar(this, 'Até logo')"><span class="icone">&#128075;</span><span class="texto">Até logo</span></div>
+<div class="btn-card" onclick="falar(this, 'Parabéns')"><span class="icone">&#127881;</span><span class="texto">Parabéns</span></div>
+<div class="btn-card" onclick="falar(this, 'Bom trabalho')"><span class="icone">&#11088;</span><span class="texto">Bom trabalho</span></div>
+</div>
+</div>
+<div id="responder" class="aba-conteudo cat-responder">
+<div class="secao-titulo">Respostas Diretas</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Sim')"><span class="icone">&#9989;</span><span class="texto">Sim</span></div>
+<div class="btn-card" onclick="falar(this, 'Não')"><span class="icone">&#10060;</span><span class="texto">Não</span></div>
+<div class="btn-card" onclick="falar(this, 'Talvez')"><span class="icone">&#129335;</span><span class="texto">Talvez</span></div>
+<div class="btn-card" onclick="falar(this, 'Não sei')"><span class="icone">&#129300;</span><span class="texto">Não sei</span></div>
+<div class="btn-card" onclick="falar(this, 'Concordo')"><span class="icone">&#128077;</span><span class="texto">Concordo</span></div>
+<div class="btn-card" onclick="falar(this, 'Discordo')"><span class="icone">&#128078;</span><span class="texto">Discordo</span></div>
+<div class="btn-card" onclick="falar(this, 'Não entendi')"><span class="icone">&#128533;</span><span class="texto">Não entendi</span></div>
+<div class="btn-card" onclick="falar(this, 'Pode repetir?')"><span class="icone">&#128260;</span><span class="texto">Pode repetir?</span></div>
+<div class="btn-card" onclick="falar(this, 'Está certo')"><span class="icone">&#10004;</span><span class="texto">Está certo</span></div>
+<div class="btn-card" onclick="falar(this, 'Está errado')"><span class="icone">&#10006;</span><span class="texto">Está errado</span></div>
+</div>
+</div>
+<div id="brincar" class="aba-conteudo cat-brincar">
+<div class="secao-titulo">Parque e Brinquedos</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Quero ir na balança')"><span class="icone">&#127904;</span><span class="texto">Quero ir na balança</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero ir no escorregador')"><span class="icone">&#127906;</span><span class="texto">Quero ir no escorregador</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero brincar de bola')"><span class="icone">&#9917;</span><span class="texto">Quero brincar de bola</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero brincar de boneca')"><span class="icone">&#129528;</span><span class="texto">Quero brincar de boneca</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero brincar de carrinho')"><span class="icone">&#128663;</span><span class="texto">Quero brincar de carrinho</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero pular corda')"><span class="icone">&#129525;</span><span class="texto">Quero pular corda</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero brincar de amarelinha')"><span class="icone">&#128290;</span><span class="texto">Quero brincar de amarelinha</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero brincar de esconde-esconde')"><span class="icone">&#129763;</span><span class="texto">Quero brincar de esconde-esconde</span></div>
+</div>
+<div class="secao-titulo">Com os Colegas</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Quero brincar com você')"><span class="icone">&#129309;</span><span class="texto">Quero brincar com você</span></div>
+<div class="btn-card" onclick="falar(this, 'Posso me juntar a vocês?')"><span class="icone">&#128107;</span><span class="texto">Posso me juntar a vocês?</span></div>
+<div class="btn-card" onclick="falar(this, 'Vamos brincar juntos')"><span class="icone">&#127881;</span><span class="texto">Vamos brincar juntos</span></div>
+<div class="btn-card" onclick="falar(this, 'Quero ficar sozinho')"><span class="icone">&#129496;</span><span class="texto">Quero ficar sozinho</span></div>
+</div>
+</div>
+<div id="numeros" class="aba-conteudo cat-numeros">
+  <div class="secao-titulo">Aprendendo os Números</div>
+  <p style="font-size:.9rem; color:#666; margin-bottom:12px;">Toque no número para ouvir a pronúncia correta!</p>
+  <div class="grid-numeros" id="gridNumeros"></div>
+  <button class="btn-contar" onclick="contarAte10()">Contar até 10!</button>
+</div>
+
+<div id="diario" class="aba-conteudo">
+<div class="secao-titulo">Palavras Mais Usadas Hoje</div>
+<div class="diario-box">
+<ul class="ranking-lista" id="rankingLista">
+<li style="text-align:center; color:#888; background:#fafafa;">Nenhuma palavra registrada ainda</li>
+</ul>
+</div>
+<div class="secao-titulo">Observações da Professora</div>
+<div class="diario-box">
+<h3>Foi fácil compreender o que o aluno queria?</h3>
+<select id="facilidade">
+<option value="">Selecione...</option>
+<option value="Muito fácil">Muito fácil</option>
+<option value="Fácil">Fácil</option>
+<option value="Médio">Médio</option>
+<option value="Difícil">Difícil</option>
+<option value="Muito difícil">Muito difícil</option>
+</select>
+<h3>O aplicativo apresentou algum erro?</h3>
+<select id="erroApp">
+<option value="">Selecione...</option>
+<option value="Nenhum erro">Nenhum erro</option>
+<option value="Erro leve">Erro leve</option>
+<option value="Erro moderado">Erro moderado</option>
+<option value="Erro grave">Erro grave</option>
+</select>
+<textarea id="descErro" placeholder="Descreva o erro, se houver..."></textarea>
+<h3>Ficou faltando alguma coisa?</h3>
+<textarea id="faltouAlgo" placeholder="O que faltou no aplicativo? Que palavras ou funções o aluno precisou e não encontrou?"></textarea>
+<h3>Outras observações</h3>
+<textarea id="observacoes" placeholder="Escreva aqui outras observações sobre o dia..."></textarea>
+<button class="btn-salvar" onclick="salvarDiario()">Salvar Diário de Hoje</button>
+</div>
+<div class="secao-titulo">Histórico do Diário</div>
+<div class="diario-box" id="historicoDiario">
+<p style="color:#888; text-align:center;">Nenhum registro salvo ainda.</p>
+</div>
+<div style="height: 60px;"></div>
+</div>
+<div id="comer" class="aba-conteudo cat-comer">
+<div class="secao-titulo">Eu gosto de comer</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Eu gosto de comer sorvete')"><span class="icone">&#127846;</span><span class="texto">Sorvete</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de comer banana')"><span class="icone">&#127820;</span><span class="texto">Banana</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de comer iogurte do Bob Esponja')"><span class="icone">&#129371;</span><span class="texto">Iogurte do Bob Esponja</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de comer uva')"><span class="icone">&#127815;</span><span class="texto">Uva</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de comer pão')"><span class="icone">&#127838;</span><span class="texto">Pão</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de comer arroz e feijão')"><span class="icone">&#127835;</span><span class="texto">Arroz e feijão</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de comer macarrão')"><span class="icone">&#127837;</span><span class="texto">Macarrão</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de comer carne')"><span class="icone">&#129385;</span><span class="texto">Carne</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de comer frango')"><span class="icone">&#127831;</span><span class="texto">Frango</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de comer laranja')"><span class="icone">&#127818;</span><span class="texto">Laranja</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de comer maçã')"><span class="icone">&#127822;</span><span class="texto">Maçã</span></div>
+</div>
+</div>
+
+<div id="brinquedos" class="aba-conteudo cat-brinquedos">
+<div class="secao-titulo">Eu gosto de brincar</div>
+<div class="grid-botoes">
+<div class="btn-card" onclick="falar(this, 'Eu gosto de brincar com meu dinossauro')"><span class="icone">&#129429;</span><span class="texto">Dinossauro</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de brincar com meu Godzilla')"><span class="icone">&#128050;</span><span class="texto">Godzilla</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de brincar com o Sonic')"><span class="icone">&#129428;</span><span class="texto">Sonic</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de brincar com o Knuckles')"><span class="icone">&#129354;</span><span class="texto">Knuckles</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de brincar com meu tablet')"><span class="icone">&#128241;</span><span class="texto">Tablet</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de brincar com bola')"><span class="icone">&#9917;</span><span class="texto">Bola</span></div>
+<div class="btn-card" onclick="falar(this, 'Eu gosto de brincar com minha bicicleta')"><span class="icone">&#128690;</span><span class="texto">Bicicleta</span></div>
+</div>
+</div>
+
+  </div>
+  <aside class="coluna-mascote">
+    <video id="mascoteVideo" class="mascote-video" src="mascote.mp4" muted loop playsinline></video>
+    <div class="mascote-fala" id="mascoteFala">Oi! Toque em um botão...</div>
+  </aside>
+</div>
+  <div class="barra-inferior">
+<button class="btn-volume" onclick="alternarVolume()" id="btnVol">&#128266;</button>
+<div class="status-tts" id="statusTTS">Toque em um botão para falar</div>
+<button class="btn-volume" onclick="limparHistorico()" title="Limpar dados">&#128465;</button>
+</div>
+</div>
+<script>
+// ===== CONFIGURACOES =====
+var volumeLigado = true;
+var somAtivado = false;
+var contadorPalavras = {};
+var diarioRegistros = [];
+var dadosPessoais = { nome: '', escola: '', professora: '' };
+
+
+// ===== MODO NOTURNO =====
+var modoNoturnoAtivo = false;
+function alternarModoNoturno() {
+  modoNoturnoAtivo = !modoNoturnoAtivo;
+  document.body.classList.toggle('modo-noturno', modoNoturnoAtivo);
+  var btn = document.getElementById('btnModo');
+  if (btn) {
+    btn.innerHTML = modoNoturnoAtivo ? '&#9728;&#65039;' : '&#127769;';
+    btn.title = modoNoturnoAtivo ? 'Modo Claro' : 'Modo Noturno';
+  }
+  try { localStorage.setItem('falamigo_modo_noturno', modoNoturnoAtivo ? '1' : '0'); } catch(e){}
+}
+function carregarModoNoturno() {
+  try {
+    var salvo = localStorage.getItem('falamigo_modo_noturno');
+    if (salvo === '1') {
+      modoNoturnoAtivo = true;
+      document.body.classList.add('modo-noturno');
+      var btn = document.getElementById('btnModo');
+      if (btn) { btn.innerHTML = '&#9728;&#65039;'; btn.title = 'Modo Claro'; }
+    }
+  } catch(e){}
+}
+
+// ===== ATIVAR SOM (OBRIGATORIO NO MOBILE) =====
+function ativarSom() {
+  var status = document.getElementById('statusSom');
+  var btnEntrar = document.getElementById('btnEntrar');
+
+  if (!window.speechSynthesis) {
+    status.textContent = 'TTS não suportado neste navegador';
+    status.style.background = 'rgba(200,0,0,0.3)';
+    return;
+  }
+
+  // Tenta tocar um som curto para desbloquear o audio no mobile
+  var teste = new SpeechSynthesisUtterance('Som ativado');
+  teste.lang = 'pt-BR';
+  teste.volume = 0.1;
+  teste.rate = 1.5;
+
+  teste.onend = function() {
+    somAtivado = true;
+    status.textContent = 'Som ativado! Agora toque em ENTRAR';
+    status.style.background = 'rgba(0,150,0,0.3)';
+    btnEntrar.style.opacity = '1';
+    btnEntrar.style.pointerEvents = 'auto';
+  };
+
+  teste.onerror = function() {
+    // Mesmo com erro, tenta continuar
+    somAtivado = true;
+    status.textContent = 'Som liberado! Toque em ENTRAR';
+    status.style.background = 'rgba(0,150,0,0.3)';
+    btnEntrar.style.opacity = '1';
+    btnEntrar.style.pointerEvents = 'auto';
+  };
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(teste);
+
+  // Fallback: se não disparar em 2s, libera mesmo assim
+  setTimeout(function() {
+    if (!somAtivado) {
+      somAtivado = true;
+      status.textContent = 'Som liberado! Toque em ENTRAR';
+      status.style.background = 'rgba(0,150,0,0.3)';
+      btnEntrar.style.opacity = '1';
+      btnEntrar.style.pointerEvents = 'auto';
+    }
+  }, 2000);
+}
+
+// ===== ENTRAR NO APP =====
+function entrarApp() {
+  if (!somAtivado) {
+    document.getElementById('statusSom').textContent = 'Toque em "Ativar Som" primeiro!';
+    return;
+  }
+  document.getElementById('telaInicial').classList.add('oculto');
+  document.getElementById('app').classList.add('ativo');
+  carregarModoNoturno();
+  carregarDados();
+  carregarDadosPessoais();
+  atualizarHora();
+  setInterval(atualizarHora, 30000);
+  var vid = document.getElementById('mascoteVideo');
+  vid.play().catch(function(e) { console.log('Autoplay bloqueado'); });
+}
+
+function atualizarHora() {
+  var agora = new Date();
+  var h = String(agora.getHours()).padStart(2,'0');
+  var m = String(agora.getMinutes()).padStart(2,'0');
+  document.getElementById('horaAtual').textContent = h + ':' + m;
+}
+
+// ===== NAVEGACAO =====
+function mostrarAba(id, btn) {
+  var abas = document.querySelectorAll('.aba-conteudo');
+  var botoes = document.querySelectorAll('.aba-btn');
+  for (var i = 0; i < abas.length; i++) { abas[i].classList.remove('ativa'); }
+  for (var i = 0; i < botoes.length; i++) { botoes[i].classList.remove('ativa'); }
+  document.getElementById(id).classList.add('ativa');
+  btn.classList.add('ativa');
+}
+
+// ===== FALAR (TTS + MASCOTE) =====
+function falar(elemento, texto) {
+  elemento.classList.add('anim-clique');
+  setTimeout(function() { elemento.classList.remove('anim-clique'); }, 300);
+
+  document.getElementById('mascoteFala').textContent = texto;
+  document.getElementById('statusTTS').textContent = 'Falando...';
+
+  var vid = document.getElementById('mascoteVideo');
+  mascoteReagir();
+
+  if (volumeLigado && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+
+    var fala = new SpeechSynthesisUtterance(texto);
+    fala.lang = 'pt-BR';
+    fala.rate = 0.85;
+    fala.pitch = 1.0;
+    fala.volume = 1.0;
+
+    var falou = false;
+    fala.onstart = function() { falou = true; };
+    fala.onend = function() {
+      pararMascote();
+      document.getElementById('statusTTS').textContent = 'Pronto!';
+    };
+    fala.onerror = function(e) {
+      console.log('TTS error:', e);
+      pararMascote();
+      document.getElementById('statusTTS').textContent = 'Erro no som';
+    };
+
+    // Seleciona voz em portugues
+    var vozes = window.speechSynthesis.getVoices();
+    for (var i = 0; i < vozes.length; i++) {
+      if (vozes[i].lang && vozes[i].lang.indexOf('pt') === 0) {
+        fala.voice = vozes[i];
+        break;
+      }
+    }
+
+    window.speechSynthesis.speak(fala);
+
+    // Fallback: para o video apos 4s se onend nao disparar
+    setTimeout(function() {
+      if (!falou) {
+        // Tenta de novo com resume
+        window.speechSynthesis.resume && window.speechSynthesis.resume();
+      }
+    }, 500);
+
+    setTimeout(function() {
+      pararMascote();
+      document.getElementById('statusTTS').textContent = 'Pronto!';
+    }, 4000);
+
+  } else {
+    setTimeout(function() { pararMascote(); }, 2000);
+    document.getElementById('statusTTS').textContent = volumeLigado ? 'Som não disponível' : 'Som desligado';
+  }
+
+  registrarUso(texto);
+}
+
+// ===== APRESENTACAO =====
+function apresentar() {
+  var nome = dadosPessoais.nome || 'eu';
+  var escola = dadosPessoais.escola || 'esta escola';
+  var professora = dadosPessoais.professora || 'minha professora';
+
+  var texto = 'Oi! Meu nome é ' + nome + '. Eu estudo em ' + escola + '. ' +
+    'Minha professora se chama ' + professora + '. ' +
+    'Eu sou uma pessoa não verbal e me comunico através deste aplicativo. ' +
+    'Por favor, tenha paciência comigo. Obrigado!';
+
+  document.getElementById('mascoteFala').textContent = texto;
+  document.getElementById('statusTTS').textContent = 'Falando apresentação...';
+
+  var vid = document.getElementById('mascoteVideo');
+  vid.currentTime = 0;
+  vid.play().catch(function(e) {});
+
+  if (volumeLigado && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    var fala = new SpeechSynthesisUtterance(texto);
+    fala.lang = 'pt-BR';
+    fala.rate = 0.85;
+    fala.pitch = 1.0;
+    fala.volume = 1.0;
+    fala.onend = function() {
+      pararMascote();
+      document.getElementById('statusTTS').textContent = 'Pronto!';
+    };
+    var vozes = window.speechSynthesis.getVoices();
+    for (var i = 0; i < vozes.length; i++) {
+      if (vozes[i].lang && vozes[i].lang.indexOf('pt') === 0) {
+        fala.voice = vozes[i]; break;
+      }
+    }
+    window.speechSynthesis.speak(fala);
+    setTimeout(function() { pararMascote(); }, 12000);
+  }
+}
+
+function falarComunicacao() {
+  var texto = 'Eu sou uma pessoa não verbal. Isso significa que eu não falo com a boca, mas eu entendo tudo o que você diz. Eu me comunico através deste aplicativo Falamigo. Quando eu toco nos botões, o aplicativo fala por mim. Por favor, tenha paciência e aguarde eu escolher o que quero dizer.';
+
+  document.getElementById('mascoteFala').textContent = texto;
+  document.getElementById('statusTTS').textContent = 'Falando...';
+
+  var vid = document.getElementById('mascoteVideo');
+  vid.currentTime = 0;
+  vid.play().catch(function(e) {});
+
+  if (volumeLigado && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    var fala = new SpeechSynthesisUtterance(texto);
+    fala.lang = 'pt-BR';
+    fala.rate = 0.85;
+    fala.pitch = 1.0;
+    fala.volume = 1.0;
+    fala.onend = function() {
+      pararMascote();
+      document.getElementById('statusTTS').textContent = 'Pronto!';
+    };
+    var vozes = window.speechSynthesis.getVoices();
+    for (var i = 0; i < vozes.length; i++) {
+      if (vozes[i].lang && vozes[i].lang.indexOf('pt') === 0) {
+        fala.voice = vozes[i]; break;
+      }
+    }
+    window.speechSynthesis.speak(fala);
+    setTimeout(function() { pararMascote(); }, 15000);
+  }
+}
+
+// ===== DADOS PESSOAIS =====
+function salvarDadosPessoais() {
+  dadosPessoais.nome = document.getElementById('nomeAluno').value.trim();
+  dadosPessoais.escola = document.getElementById('nomeEscola').value.trim();
+  dadosPessoais.professora = document.getElementById('nomeProfessora').value.trim();
+  try {
+    localStorage.setItem('falamigo_escola_pessoal', JSON.stringify(dadosPessoais));
+  } catch(e) {}
+  alert('Dados salvos!');
+}
+
+function carregarDadosPessoais() {
+  try {
+    var d = localStorage.getItem('falamigo_escola_pessoal');
+    if (d) {
+      dadosPessoais = JSON.parse(d);
+      document.getElementById('nomeAluno').value = dadosPessoais.nome || '';
+      document.getElementById('nomeEscola').value = dadosPessoais.escola || '';
+      document.getElementById('nomeProfessora').value = dadosPessoais.professora || '';
+    }
+  } catch(e) {}
+}
+
+// ===== REGISTRO DE USO =====
+function registrarUso(texto) {
+  if (!contadorPalavras[texto]) { contadorPalavras[texto] = 0; }
+  contadorPalavras[texto]++;
+  salvarDados();
+  atualizarRanking();
+}
+
+function atualizarRanking() {
+  var lista = document.getElementById('rankingLista');
+  var entradas = [];
+  for (var palavra in contadorPalavras) {
+    entradas.push({ texto: palavra, qtd: contadorPalavras[palavra] });
+  }
+  entradas.sort(function(a, b) { return b.qtd - a.qtd; });
+  if (entradas.length === 0) {
+    lista.innerHTML = '<li style="text-align:center; color:#888; background:#fafafa;">Nenhuma palavra registrada ainda</li>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < entradas.length && i < 15; i++) {
+    html += '<li><span>' + entradas[i].texto + '</span><span class="contador">' + entradas[i].qtd + 'x</span></li>';
+  }
+  lista.innerHTML = html;
+}
+
+// ===== DIARIO =====
+function salvarDiario() {
+  var facilidade = document.getElementById('facilidade').value;
+  var erro = document.getElementById('erroApp').value;
+  var descErro = document.getElementById('descErro').value.trim();
+  var faltou = document.getElementById('faltouAlgo').value.trim();
+  var obs = document.getElementById('observacoes').value.trim();
+  if (!facilidade && !erro && !descErro && !faltou && !obs) {
+    alert('Preencha pelo menos um campo para salvar.');
+    return;
+  }
+  var data = new Date();
+  var registro = {
+    data: data.toLocaleDateString('pt-BR'),
+    hora: data.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}),
+    facilidade: facilidade, erro: erro, descErro: descErro,
+    faltou: faltou, observacoes: obs
+  };
+  diarioRegistros.unshift(registro);
+  salvarDados();
+  atualizarHistorico();
+  document.getElementById('facilidade').value = '';
+  document.getElementById('erroApp').value = '';
+  document.getElementById('descErro').value = '';
+  document.getElementById('faltouAlgo').value = '';
+  document.getElementById('observacoes').value = '';
+  alert('Diário salvo com sucesso!');
+}
+
+function atualizarHistorico() {
+  var div = document.getElementById('historicoDiario');
+  if (diarioRegistros.length === 0) {
+    div.innerHTML = '<p style="color:#888; text-align:center;">Nenhum registro salvo ainda.</p>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < diarioRegistros.length; i++) {
+    var r = diarioRegistros[i];
+    html += '<div style="border:1px solid #c8e6c9; border-radius:10px; padding:12px; margin-bottom:10px; background:#fafafa;">';
+    html += '<div style="font-weight:bold; color:#2e7d32; margin-bottom:6px;">' + r.data + ' às ' + r.hora + '</div>';
+    if (r.facilidade) html += '<div style="margin-bottom:4px;"><b>Fácil compreender:</b> ' + r.facilidade + '</div>';
+    if (r.erro) html += '<div style="margin-bottom:4px;"><b>Erro no app:</b> ' + r.erro + '</div>';
+    if (r.descErro) html += '<div style="margin-bottom:4px; color:#c62828;"><b>Descrição do erro:</b> ' + r.descErro + '</div>';
+    if (r.faltou) html += '<div style="margin-bottom:4px; color:#ef6c00;"><b>Faltou algo:</b> ' + r.faltou + '</div>';
+    if (r.observacoes) html += '<div style="color:#555;"><b>Observações:</b> ' + r.observacoes + '</div>';
+    html += '</div>';
+  }
+  div.innerHTML = html;
+}
+
+// ===== LOCALSTORAGE =====
+function salvarDados() {
+  try {
+    localStorage.setItem('falamigo_escola_contador', JSON.stringify(contadorPalavras));
+    localStorage.setItem('falamigo_escola_diario', JSON.stringify(diarioRegistros));
+  } catch(e) { console.log('Erro ao salvar', e); }
+}
+
+function carregarDados() {
+  try {
+    var c = localStorage.getItem('falamigo_escola_contador');
+    var d = localStorage.getItem('falamigo_escola_diario');
+    if (c) contadorPalavras = JSON.parse(c);
+    if (d) diarioRegistros = JSON.parse(d);
+    atualizarRanking();
+    atualizarHistorico();
+  } catch(e) { console.log('Erro ao carregar', e); }
+}
+
+function limparHistorico() {
+  if (confirm('Tem certeza que deseja apagar todos os dados salvos?')) {
+    contadorPalavras = {};
+    diarioRegistros = [];
+    localStorage.removeItem('falamigo_escola_contador');
+    localStorage.removeItem('falamigo_escola_diario');
+    localStorage.removeItem('falamigo_escola_pessoal');
+    atualizarRanking();
+    atualizarHistorico();
+    document.getElementById('nomeAluno').value = '';
+    document.getElementById('nomeEscola').value = '';
+    document.getElementById('nomeProfessora').value = '';
+  }
+}
+
+// ===== VOLUME =====
+function alternarVolume() {
+  volumeLigado = !volumeLigado;
+  document.getElementById('btnVol').innerHTML = volumeLigado ? '&#128266;' : '&#128263;';
+  document.getElementById('statusTTS').textContent = volumeLigado ? 'Som ligado' : 'Som desligado';
+}
+
+// ===== PREVENCAO DE ZOOM =====
+document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+document.addEventListener('dblclick', function(e) { e.preventDefault(); });
+
+// ===== CARREGAR VOZES =====
+if (window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = function() {
+    window.speechSynthesis.getVoices();
+  };
+}
+
+// ===== MASCOTE REAGE A TODOS OS BOTOES =====
+var _mascoteTimer = null;
+var _deferCount = 0;
+function mascoteReagir() {
+  var vid = document.getElementById('mascoteVideo');
+  if (!vid) return;
+  vid.muted = true;
+  vid.classList.add('falando');
+  try { vid.currentTime = 0; } catch(e) {}
+  var p = vid.play();
+  if (p && p.catch) { p.catch(function(){}); }
+  clearTimeout(_mascoteTimer);
+  _mascoteTimer = setTimeout(pararMascote, 3000);
+}
+function pararMascote() {
+  // Nao interrompe se o TTS ainda estiver falando (onend "fantasma" do cancel())
+  if (window.speechSynthesis &&
+      (window.speechSynthesis.speaking || window.speechSynthesis.pending) && _deferCount < 25) {
+    _deferCount++;
+    clearTimeout(_mascoteTimer);
+    _mascoteTimer = setTimeout(pararMascote, 1000);
+    return;
+  }
+  _deferCount = 0;
+  var vid = document.getElementById('mascoteVideo');
+  if (!vid) return;
+  clearTimeout(_mascoteTimer);
+  vid.classList.remove('falando');
+  vid.pause();
+}
+document.addEventListener('click', function(e) {
+  var alvo = e.target;
+  while (alvo && alvo !== document.body) {
+    if (alvo.classList && (alvo.classList.contains('btn-card') || alvo.classList.contains('btn-numero') ||
+        alvo.classList.contains('btn-falar') || alvo.classList.contains('aba-btn') ||
+        alvo.classList.contains('btn-salvar') || alvo.classList.contains('btn-contar'))) {
+      mascoteReagir();
+      break;
+    }
+    alvo = alvo.parentNode;
+  }
+});
+
+// ===== NUMEROS COM PRONUNCIA =====
+var NUMEROS = [
+  {n:0, esc:'zero', fon:'ZÉ-ro'},
+  {n:1, esc:'um', fon:'ÚN'},
+  {n:2, esc:'dois', fon:'DOYS'},
+  {n:3, esc:'três', fon:'TRÉS'},
+  {n:4, esc:'quatro', fon:'KWÁ-tro'},
+  {n:5, esc:'cinco', fon:'SÍN-ko'},
+  {n:6, esc:'seis', fon:'SEYS'},
+  {n:7, esc:'sete', fon:'SÉ-tchi'},
+  {n:8, esc:'oito', fon:'ÔI-to'},
+  {n:9, esc:'nove', fon:'NÓ-vi'},
+  {n:10, esc:'dez', fon:'DÉS'}
+];
+function montarNumeros() {
+  var grid = document.getElementById('gridNumeros');
+  if (!grid) return;
+  var h = '';
+  for (var i = 0; i < NUMEROS.length; i++) {
+    h += '<button class="btn-numero" onclick="falarNumero(' + i + ')">' +
+      '<span class="digito">' + NUMEROS[i].n + '</span>' +
+      '<span class="escrito">' + NUMEROS[i].esc + '</span>' +
+      '<span class="fonetica">' + NUMEROS[i].fon + '</span></button>';
+  }
+  grid.innerHTML = h;
+}
+function falarNumero(i) {
+  var num = NUMEROS[i];
+  document.getElementById('mascoteFala').textContent = num.n + ' = ' + num.esc + ' (' + num.fon + ')';
+  registrarUso('Número: ' + num.esc);
+  var texto = 'O número ' + num.n + ' se escreve ' + num.esc + ', e se pronuncia: ' +
+              num.fon + '. Repita comigo: ' + num.esc + '!';
+  falarTextoLivre(texto, 'Falando número...');
+}
+function contarAte10() {
+  document.getElementById('mascoteFala').textContent = 'Contando até 10...';
+  registrarUso('Contar até 10');
+  var texto = 'Vamos contar até dez! Um, dois, três, quatro, cinco, seis, sete, oito, nove, dez! Muito bem!';
+  falarTextoLivre(texto, 'Contando...');
+}
+function falarTextoLivre(texto, status) {
+  mascoteReagir();
+  document.getElementById('statusTTS').textContent = status;
+  if (volumeLigado && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    var fala = new SpeechSynthesisUtterance(texto);
+    fala.lang = 'pt-BR'; fala.rate = 0.8; fala.pitch = 1.1; fala.volume = 1.0;
+    fala.onend = function() { pararMascote(); document.getElementById('statusTTS').textContent = 'Pronto!'; };
+    fala.onerror = fala.onend;
+    var vozes = window.speechSynthesis.getVoices();
+    for (var i = 0; i < vozes.length; i++) {
+      if (vozes[i].lang && vozes[i].lang.indexOf('pt') === 0) { fala.voice = vozes[i]; break; }
+    }
+    window.speechSynthesis.speak(fala);
+  } else {
+    setTimeout(pararMascote, 2000);
+    document.getElementById('statusTTS').textContent = volumeLigado ? 'Som não disponível' : 'Som desligado';
+  }
+}
+montarNumeros();
+</script>
+</body>
+</html>
